@@ -14,21 +14,35 @@ function Square(props) {
   );
 }
 //renders 9 squares
-  class Board extends React.Component {
+class Board extends React.Component {
 
     constructor(props){
         super(props);
         this.state={
           squares : Array(9).fill(null),
+          xisNext:true , 
         };
     }
 
     handleClick(i){
-      const squares = this.state.squares.slice();
-      squares[i] = 'X';
-      this.setState({squares: squares})
+        const squares = this.state.squares.slice();
 
+
+        if( calculateWinner(squares) || squares[i]){
+          console.log("winner invoked or squre is already filled");
+          return ;
+        }
+        squares[i] = (this.state.xisNext)?'X':'O';
+        this.setState({
+                      squares : squares , 
+                      xisNext : !(this.state.xisNext)
+        })
+
+        
+         
     }
+
+
 
     renderSquare(i) {
       return <Square value = {this.state.squares[i]} 
@@ -41,8 +55,18 @@ function Square(props) {
     
 
     render() {
-      const status = 'Next player: X';
   
+      let status;
+
+      if(calculateWinner(this.state.squares)){
+        status = "Winner -> " + (this.state.xisNext ? 'O' : 'X');
+      }
+      else{
+        status = "Next player -> " + (this.state.xisNext ? 'X':'O');
+      }
+
+      
+
       return (
         <div>
           <div className="status">{status}</div>
@@ -91,3 +115,33 @@ function Square(props) {
     document.getElementById('root')
   );
   
+
+  function calculateWinner(squares){
+    const lines = [
+
+      //rows
+      [0 , 1 , 2],
+      [3 , 4 , 5],
+      [6 , 7 , 8],
+      
+      //diags
+      [0 , 4, 8] , 
+      [2 , 4 , 6],
+      
+      //cols
+      [0 , 3, 6] , 
+      [1 , 4 , 7] , 
+      [2 , 5, 8]
+
+    ];
+    
+
+    for(let i=0;i<lines.length;i++){
+      const [a , b , c] = lines[i];
+
+      if(squares[a] && squares[a] === squares[b] && squares[a] === squares[c])
+        return true;
+    }
+
+    return null;
+  }
